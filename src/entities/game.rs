@@ -7,53 +7,60 @@ use crate::entities::game_entity::GameEntity;
 
 pub enum GameEvent {
     Quit,
-    Space,
-    W,
-    A,
-    S,
-    D
+    Space(EventType),
+    W(EventType),
+    A(EventType),
+    S(EventType),
+    D(EventType)
+}
+
+pub enum EventType {
+    Up,
+    Down
 }
 
 pub struct Game {
     entities: LinkedList<GameEntity>,
     sdl_adapter: SdlAdapter,
-    width: u32,
-    height: u32,
 }
 
 impl Game {
-    pub fn new(width: u32, height: u32, title: &str) -> Result<Game, String> {
-        let player = GameEntity::new(10, 10, 10, 10, Color::BLUE);
+    pub fn new(width: u32, height: u32, title: &str) -> Game {
+        let player = GameEntity::new(100, 100, 50, 50, Color::BLUE);
         let mut entities = LinkedList::new();
         entities.push_back(player);
-        Ok(Game {
+        Game {
             entities,
-            sdl_adapter: SdlAdapter::new(width, height, title).unwrap(),
-            width,
-            height,
-        })
+            sdl_adapter: SdlAdapter::new(width, height, title).unwrap()
+        }
     }
     pub fn player(&mut self) -> &mut GameEntity {
         self.entities.front_mut().unwrap()
     }
-}
-
-pub trait GameBehaviour {
-    fn run_internal(&mut self, game: &mut Game) {
-        'running: loop {
-            match game.sdl_adapter.poll_event() {
+    pub fn run(&mut self) -> Result<(), String> {
+        loop {
+            match self.sdl_adapter.poll_event() {
                 None => (),
                 Some(GameEvent::Quit) => {
-                    break 'running;
+                    return Ok(());
                 },
-                Some(game_event) => self.update(game_event)
+                Some(game_event) => self.process_events(game_event)
+            }
+            self.update();
+            match self.render() {
+                Err(x) => return Err(x),
+                _ => {}
             }
             ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
     }
-    fn render(game: &mut Game) -> Result<(), String> {
-        game.sdl_adapter.render_game(&game.entities)
+    fn render(&mut self) -> Result<(), String> {
+        self.sdl_adapter.render_game(&self.entities)
     }
-    fn update(&mut self, game_event: GameEvent);
+}
+
+pub trait GameBehaviour {
+    fn process_events(&mut self, game_event: GameEvent);
+    fn update(&mut self);
 }
 

@@ -2,11 +2,11 @@ mod entities;
 mod interface_adapters;
 mod services;
 
-use entities::{flappy_game::FlappyGame, game::GameBehaviour};
+use entities::flappy_game::FlappyGame;
 
 fn main() -> Result<(), String> {
-    let mut flappy_game = FlappyGame::new()?;
-    flappy_game.run_internal(&mut flappy_game.game);
+    let mut flappy_game = FlappyGame::new(1200, 800, "test");
+    flappy_game.run();
 
     Ok(())
 }
