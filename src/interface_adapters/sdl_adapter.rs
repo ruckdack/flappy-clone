@@ -37,6 +37,7 @@ impl SdlAdapter {
         })
 
     }
+
     pub fn render_game(&mut self, game_entites: &LinkedList<GameEntity>) -> Result<(), String> {
         self.canvas.set_draw_color(Color::WHITE);
         self.canvas.clear();
@@ -44,16 +45,17 @@ impl SdlAdapter {
             self.canvas.set_draw_color(entity.color());
             self.canvas.fill_rect(
                 Rect::new(
-                    entity.x_pos - entity.width_i32() / 2,
-                    entity.y_pos - entity.height_i32() / 2,
-                    entity.width(),
-                    entity.height()
+                    entity.x_pos,
+                    entity.y_pos,
+                    entity.width,
+                    entity.height
                 )
             )?;
         }
         self.canvas.present();
         Ok(())
     }
+    
     pub fn poll_event(&mut self) -> Option<GameEvent> {
         for event in self.event_pump.poll_iter() {
             match event {
@@ -90,6 +92,31 @@ impl SdlAdapter {
                 },
                 Event::KeyUp { keycode: Some(Keycode::D), .. } => {
                     return Some(GameEvent::D(EventType::Up));
+                },
+                // ----
+                Event::KeyDown { keycode: Some(Keycode::Up), .. } => {
+                    return Some(GameEvent::Up(EventType::Down));
+                },
+                Event::KeyUp { keycode: Some(Keycode::Up), .. } => {
+                    return Some(GameEvent::Up(EventType::Up));
+                },
+                Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
+                    return Some(GameEvent::Left(EventType::Down));
+                },
+                Event::KeyUp { keycode: Some(Keycode::Left), .. } => {
+                    return Some(GameEvent::Left(EventType::Up));
+                },
+                Event::KeyDown { keycode: Some(Keycode::Down), .. } => {
+                    return Some(GameEvent::Down(EventType::Down));
+                },
+                Event::KeyUp { keycode: Some(Keycode::Down), .. } => {
+                    return Some(GameEvent::Down(EventType::Up));
+                },
+                Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
+                    return Some(GameEvent::Right(EventType::Down));
+                },
+                Event::KeyUp { keycode: Some(Keycode::Right), .. } => {
+                    return Some(GameEvent::Right(EventType::Up));
                 },
                 _ => {
                     return None;
